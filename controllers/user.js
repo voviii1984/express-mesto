@@ -8,25 +8,28 @@ module.exports = {
   findUsers(req, res) {
     User.find({})
       .then((users) => res.send({ users }))
-      .catch(err => res.status(ERROR_CODE_INTERNAL_SERVER_ERROR)
-        .send({ message: 'Произошла ошибка' }));
+      .catch((err) => res.status(ERROR_CODE_INTERNAL_SERVER_ERROR)
+        .send({ message: `Произошла ошибка: ${err.message}` }));
   },
   findOneUser(req, res) {
-    User.findById(req.user._id)
+    User.findById(req.params.userId)
       .then((user) => {
         if (!user) {
-          return res.status(ERROR_CODE_NOT_FOUND)
+          return res
+            .status(ERROR_CODE_NOT_FOUND)
             .send({ message: 'Пользователь по указанному _id не найден.' });
         }
-        res.send({ user });
+        return res.send({ user });
       })
       .catch((err) => {
-        if (err.name === "ValidationError") {
-          return res.status(ERROR_CODE_NOT_FOUND)
-            .send({ message: "Переданы некорректные данные при создании карточки" });
+        if (err.name === 'CastError') {
+          return res
+            .status(ERROR_CODE_BAD_REQUEST)
+            .send({ message: 'Переданы некорректные данные при создании карточки' });
         }
-        return res.status(ERROR_CODE_INTERNAL_SERVER_ERROR)
-          .send({ message: 'Произошла ошибка' });
+        return res
+          .status(ERROR_CODE_INTERNAL_SERVER_ERROR)
+          .send({ message: `Произошла ошибка: ${err.message}` });
       });
   },
   createUser(req, res) {
@@ -35,12 +38,22 @@ module.exports = {
     User.create({ name, about, avatar })
       .then((user) => {
         if (!user) {
-          return res.status(ERROR_CODE_BAD_REQUEST)
+          return res
+            .status(ERROR_CODE_NOT_FOUND)
             .send({ message: 'Переданы некорректные данные при создании профиля.' });
         }
-        res.send({ user });
+        return res.send({ user });
       })
-      .catch(err => res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' }));
+      .catch((err) => {
+        if (err.name === 'ValidationError') {
+          return res
+            .status(ERROR_CODE_BAD_REQUEST)
+            .send({ message: 'Пользователь с указанным _id не найден.' });
+        }
+        return res
+          .status(ERROR_CODE_INTERNAL_SERVER_ERROR)
+          .send({ message: `Произошла ошибка: ${err.message}` });
+      });
   },
   updateUser(req, res) {
     const { name, about } = req.body;
@@ -48,17 +61,21 @@ module.exports = {
     User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
       .then((user) => {
         if (!user) {
-          return res.status(ERROR_CODE_BAD_REQUEST)
+          return res
+            .status(ERROR_CODE_NOT_FOUND)
             .send({ message: 'Переданы некорректные данные при обновлении профиля.' });
         }
-        res.send({ user });
+        return res.send({ user });
       })
       .catch((err) => {
         if (err.name === 'CastError') {
-          return res.status(ERROR_CODE_NOT_FOUND)
+          return res
+            .status(ERROR_CODE_BAD_REQUEST)
             .send({ message: 'Пользователь с указанным _id не найден.' });
         }
-        return res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+        return res
+          .status(ERROR_CODE_INTERNAL_SERVER_ERROR)
+          .send({ message: `Произошла ошибка: ${err.message}` });
       });
   },
   updateAvatar(req, res) {
@@ -67,17 +84,21 @@ module.exports = {
     User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
       .then((user) => {
         if (!user) {
-          return res.status(ERROR_CODE_BAD_REQUEST)
+          return res
+            .status(ERROR_CODE_NOT_FOUND)
             .send({ message: 'Переданы некорректные данные при обновлении аватара.' });
         }
-        res.send({ user });
+        return res.send({ user });
       })
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          return res.status(ERROR_CODE_NOT_FOUND)
+          return res
+            .status(ERROR_CODE_BAD_REQUEST)
             .send({ message: 'Пользователь с указанным _id не найден.' });
         }
-        return res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+        return res
+          .status(ERROR_CODE_INTERNAL_SERVER_ERROR)
+          .send({ message: `Произошла ошибка: ${err.message}` });
       });
   },
 };
