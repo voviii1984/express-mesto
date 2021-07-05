@@ -56,10 +56,9 @@ app.use(auth);
 app.use('/', userRoutes);
 app.use('/', cardRoutes);
 
-app.use(errors()); // обработчик ошибок celebrate
-
 app.use(badRouter);
 
+app.use(errors()); // обработчик ошибок celebrate
 app.use(internalServerError);
 
 app.listen(PORT);
