@@ -10,7 +10,8 @@ const userRoutes = require('./routes/user');
 const cardRoutes = require('./routes/card');
 const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
-const InternalServerError = require('./errors/internal-server-err');
+const badRouter = require('./routes/badRouter');
+const internalServerError = require('./errors/internal-server-err');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -57,6 +58,8 @@ app.use('/', cardRoutes);
 
 app.use(errors()); // обработчик ошибок celebrate
 
-app.use(InternalServerError);
+app.use(badRouter);
+
+app.use(internalServerError);
 
 app.listen(PORT);
